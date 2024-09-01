@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decax Chatbot</title>
+    <style>
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .chatbox {
+            width: 300px;
+            height: 400px;
+            border: 2px solid #333;
+            border-radius: 8px;
+            background-color: #fff;
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+        }
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 10px;
+        }
+        .input-area {
+            display: flex;
+        }
+        input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #333;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px;
+            border: none;
+            background-color: #333;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 4px;
+            margin-left: 5px;
+        }
+        button:hover {
+            background-color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="chatbox">
+        <div class="messages" id="messages">
+            <div><strong>System:</strong> Hello! How can I help you today?</div>
+        </div>
+        <div class="input-area">
+            <input type="text" id="userInput" placeholder="Type your message...">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        const apiKey = 'YOUR_OPENAI_API_KEY';  // Replace with your OpenAI API key
+        const chatEndpoint = 'https://api.openai.com/v1/chat/completions';
+
+        async function sendMessage() {
+            const input = document.getElementById('userInput');
+            const userMessage = input.value.trim();
+            if (userMessage === '') return;
+
+            const messagesDiv = document.getElementById('messages');
+            messagesDiv.innerHTML += `<div><strong>Roblox Script:</strong> ${userMessage}</div>`;
+            input.value = '';
+
+            try {
+                const response = await fetch(chatEndpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: 'gpt-3.5-turbo',  // Or another available model
+                        messages: [
+                            { role: 'system', content: 'You are a helpful assistant.' },
+                            { role: 'user', content: userMessage }
+                        ]
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const data = await response.json();
+                const botMessage = data.choices[0].message.content;
+                messagesDiv.innerHTML += `<div><strong>Decax:</strong> ${botMessage}</div>`;
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+            } catch (error) {
+                console.error('Error:', error);
+                messagesDiv.innerHTML += `<div><strong>Decax:</strong> Sorry, something went wrong.</div>`;
+            }
+        }
+    </script>
+</body>
+</html>
